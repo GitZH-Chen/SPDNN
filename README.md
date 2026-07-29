@@ -56,8 +56,6 @@ bash scripts/train_fpha_spnn_bwm.sh
 bash scripts/train_fpha_baselines.sh
 ```
 
-`RResNet` is exposed by the original Hydra configuration name `SPDResNet`.
-
 ## Evaluation protocol
 
 FPHA uses its prepared official training and test split.
