@@ -64,4 +64,4 @@ FPHA uses its prepared official training and test split. Each released setting i
 
 ## Output
 
-Results can be found in `outputs/${DATASET}/`. The final accuracies, selected as the maximum over the last 10 epochs of each run, are recorded in `final_results_last_k_${DATASET}`.
+Results can be found in `outputs/${DATASET}/`. The final accuracies are recorded in `final_results_last_k_${DATASET}`.
