@@ -21,7 +21,7 @@ conda activate SPNN
 
 The SPNN and Gyro methods default to CUDA device `0`; select another CUDA device with `DEVICE`. The SPDNet-family baselines run on CPU.
 
-## Data
+## Data 
 
 The two prepared FPHA archives are included in `data/`:
 
