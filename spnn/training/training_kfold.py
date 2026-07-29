@@ -118,12 +118,12 @@ def save_print_results(args,acc_val_all,acc_val_last_k,logger,range):
 
     mean = np.asarray(acc_val_last_k).mean()
     std = np.asarray(acc_val_last_k).std()
-    final_results_last_k = f'{args.folds} folds best-in-last-{range:d} average result is: {mean:.2f}±{std:.2f}'
-    logger.info(final_results_last_k)
+    final_results = f'{args.folds} folds best-in-last-{range:d} average result is: {mean:.2f}±{std:.2f}'
+    logger.info(final_results)
 
-    final_results_last_k_path = os.path.join(os.getcwd(), 'final_results_last_k_' + args.dataset)
-    logger.info("results file path: {}, and saving the results".format(final_results_last_k_path))
-    write_final_results(final_results_last_k_path, args.modelname + '- ' + final_results_last_k)
+    final_results_path = os.path.join(os.getcwd(), 'final_results_' + args.dataset)
+    logger.info("results file path: {}, and saving the results".format(final_results_path))
+    write_final_results(final_results_path, args.modelname + '- ' + final_results)
     th.save({
         'acc_val_all': acc_val_all,
     }, os.path.join(os.getcwd(), f'torch_results_{args.modelname}.pt'))
