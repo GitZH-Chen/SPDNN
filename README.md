@@ -1,4 +1,4 @@
-# Anonymous FPHA Reproduction Package
+# FPHA Reproduction Package
 
 This repo contains the FPHA subset of the SPD experiments. The package covers SPNN with LEM, AIM, PEM, LCM, and BWM, together with the following baselines:
 
