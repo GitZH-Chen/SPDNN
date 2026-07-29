@@ -1,0 +1,27 @@
+defaults:
+    # Inherit shared classifier and optimizer settings from SPDNet.
+    - SPDNet
+    # Apply the SPNN-specific model and classifier overrides after inheritance.
+    - _self_
+
+model:
+    # Model registry key for the proposed SPNN architecture.
+    model_type: SPNN
+    # SPD matrix dimensions at the input and output of each transformation. FPHA uses 28 x 28 input SPD matrices and a 22 x 22 output SPD matrix.
+    architecture: [28,22]
+    # Channel counts aligned with architecture. FPHA maps nine input SPD channels to one output SPD channel using a global channel receptive field.
+    channels: [9,1]
+    # Use the proposed global multi-channel SPD linear transformation.
+    transform_mode: SPDLinear
+    # If true, apply the inverse metric coordinate map after the linear scores so the layer returns SPD matrices; if false, retain chart coordinates.
+    conv_is_phi_inv: True
+    # Geometry used by SPDLinear: LEM, AIM, PEM, LCM, or BWM.
+    conv_metric: LEM
+    # Matrix-power/deformation parameter theta used by the selected geometry. It must be nonzero; LEM does not use this field.
+    conv_power: 1.
+    # Optional matrix-power activation S -> S^theta applied before SPDLinear. null disables it; the FPHA LCM and BWM launchers set it to -0.25.
+    act_power: null
+
+classifier:
+    # Use the proposed product-SPD fully connected classification head instead of the inherited LogEig plus Euclidean linear classifier.
+    classifier: SPDMLR

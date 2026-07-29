@@ -1,0 +1,28 @@
+model:
+    # Model registry key. "SPDNet" selects the bilinear SPDNet baseline.
+    model_type: SPDNet
+    # Transformation family used by SPDNet: X -> W^T X W with semi-orthogonal W.
+    transform_mode: BiMap
+    # SPD matrix dimensions used by the released FPHA baselines.
+    architecture: [63,33]
+
+classifier:
+    # Classification head. LogEigMLR applies the matrix logarithm, flattens the full matrix, and uses a Euclidean linear classifier; SPDMLR instead uses metric-specific Riemannian hyperplane scores.
+    classifier: LogEigMLR
+    # Riemannian metric for SPDMLR: LEM, AIM, PEM, LCM, or BWM. This field is inactive when classifier=LogEigMLR.
+    clf_metric: LEM
+    # Matrix-power/deformation parameter theta for metric families that use it. It must be nonzero. This field is inactive for LogEigMLR.
+    clf_power: 1.
+    # Whether the proposed SPNN classifier first applies the metric coordinate map phi to its SPD input. This compatibility field is not used by SPDNet's LogEigMLR
+    # or conventional SPDMLR implementation.
+    clf_is_phi: True
+
+optimizer:
+    # Optimizer implementation used by the retained experiments.
+    optimizer_mode: AMSGRAD
+    # Initial learning rate.
+    lr: 1e-2
+    # L2 weight-decay coefficient.
+    weight_decay: 0
+    # Momentum used by RiemannianSGD; ignored by Adam-family optimizers.
+    optimizer_momentum: 0

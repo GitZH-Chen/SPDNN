@@ -1,0 +1,6 @@
+# Dataset dispatch key selecting the global-covariance FPHA loader.
+dataset: FPHA
+# Number of FPHA action classes and therefore the classifier output dimension.
+class_num: 45
+# Prepared global-covariance root. FPHA_GLOBAL_COV takes precedence when set; otherwise use data/global_cov. The directory must contain train/ and val/ subdirectories of .npy covariance matrices.
+path: ${oc.env:FPHA_GLOBAL_COV,data/global_cov}

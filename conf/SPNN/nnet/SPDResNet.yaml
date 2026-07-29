@@ -1,0 +1,11 @@
+defaults:
+    # Inherit the SPDNet architecture, classifier, optimizer, and scheduler.
+    - SPDNet
+    # Apply the residual-network overrides below after inherited settings.
+    - _self_
+
+model:
+    # Registry key that constructs the RResNet baseline.
+    model_type: SPDResNet
+    # Riemannian geometry used by the residual block. The retained FPHA experiments use LEM and AIM variants.
+    ResBlockMetric: LEM

@@ -1,0 +1,7 @@
+defaults:
+  - SPDNet
+  - _self_
+
+model:
+  model_type: GyroSPD
+  metric: LEM

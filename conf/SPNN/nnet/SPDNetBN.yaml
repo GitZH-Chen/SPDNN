@@ -1,0 +1,13 @@
+defaults:
+    # Inherit the SPDNet model, classifier, optimizer, and scheduler settings.
+    - SPDNet
+    # Apply the overrides in this file after the inherited SPDNet settings.
+    - _self_
+
+model:
+    # Registry key shared by the Brooks-BN and LieBN SPDNet variants.
+    model_type: SPDNetRBN
+    # SPD batch-normalization implementation. "brooks" uses the affine-invariant SPD batch normalization; "LieBN" selects Lie-group SPD BN.
+    BN_type: brooks
+    # Exponential moving-average coefficient for the running SPD mean (and, for LieBN, the running variance).
+    momentum: 0.1

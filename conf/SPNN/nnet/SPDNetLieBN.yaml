@@ -1,0 +1,13 @@
+defaults:
+    # Inherit SPDNetBN, which itself inherits the complete SPDNet configuration.
+    - SPDNetBN
+    # Apply the LieBN-specific overrides below after inherited settings.
+    - _self_
+
+model:
+    # Select Lie-group SPD batch normalization instead of Brooks SPD BN.
+    BN_type: LieBN
+    # Geometry used to center, scale, and bias SPD features in LieBN. Supported values are AIM, LEM, and LCM.
+    bn_metric: AIM
+    # Matrix-power deformation theta used by AIM and LCM LieBN; 1.0 means no additional power deformation. LEM uses the matrix-log coordinates.
+    bn_power: 1.0

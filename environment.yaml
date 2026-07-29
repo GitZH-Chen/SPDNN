@@ -1,0 +1,20 @@
+name: SPNN
+channels:
+  - pytorch
+  - nvidia/label/cuda-11.7.1
+  - nvidia
+  - defaults
+dependencies:
+  - python==3.10.10
+  - pip
+  - numpy==1.23.5
+  - scipy==1.10.1
+  - pytorch==2.0.1
+  - pytorch-cuda==11.7
+  - tensorboard==2.11.0
+  - protobuf==3.20.3
+  - pip:
+      - hydra-core==1.3.2
+      - hydra-joblib-launcher==1.2.0
+      - omegaconf==2.3.0
+      - git+https://github.com/geoopt/geoopt.git@8af79c13f765035887eee5288153bffee1d262b6

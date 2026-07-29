@@ -1,0 +1,7 @@
+# Dataset dispatch key selecting the multi-channel temporal-pyramid FPHA loader.
+dataset: FPHA_TPR
+# Number of FPHA action classes and therefore the classifier output dimension.
+class_num: 45
+# Prepared multi-channel SPD root. FPHA_TPR takes precedence when set; otherwise use the bundled relative location. The directory must contain train/ and val/
+# subdirectories of .pt files with `covariance_matrices`.
+path: ${oc.env:FPHA_TPR,data/FPHA_TPR_no_wrist20_horizontal_lr_vertical_f200_k1_m2}

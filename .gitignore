@@ -1,0 +1,12 @@
+data/FPHA_TPR_no_wrist20_horizontal_lr_vertical_f200_k1_m2/
+data/global_cov/
+/tmp/
+outputs/
+tensorboard_logs/
+torch_resutls/
+time_param/
+final_results_*
+default.log
+*.pyc
+__pycache__/
+.DS_Store

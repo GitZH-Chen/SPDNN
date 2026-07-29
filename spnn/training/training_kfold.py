@@ -1,0 +1,151 @@
+from torch.utils.tensorboard import SummaryWriter
+import os
+import logging
+import json
+import torch as th
+import torch.nn as nn
+import numpy as np
+import fcntl
+
+from spnn.utils import get_model
+from spnn.utils.experiment import get_dataset_settings,optimzer,parse_cfg,train_per_epoch,val_per_epoch
+import spnn.utils.experiment as experiment_utils
+from spnn.utils.common_utils import set_seed_thread
+
+def training_KFold(cfg,args):
+    args = parse_cfg(args, cfg)
+    args.folds=cfg.fit.folds
+
+    # set logger
+    logger = logging.getLogger(args.modelname)
+    logger.setLevel(logging.INFO)
+    args.logger = logger
+    logger.info('begin model {} on dataset: {}'.format(args.modelname, args.dataset))
+
+    # set seed and threadnum
+    set_seed_thread(args.seed, args.threadnum)
+
+    # begin K fold experiments
+    acc_val_all = [];acc_val_last_k = [];acc_val_final = []
+    all_training_times = []
+    for ith in range(args.folds):
+        # set dataset, model and optimizer
+        model = get_model.get_model(args)
+        model.to(th.double)
+        model.to(args.device)
+        if ith==0:
+            logger.info(model)
+            if args.debug:
+                    return
+
+        args.DataLoader = get_dataset_settings(args)
+        loss_fn = nn.CrossEntropyLoss()
+        args.loss_fn = loss_fn.to(args.device)
+        args.opti = optimzer(model.parameters(), lr=args.lr, mode=args.optimizer_mode, weight_decay=args.weight_decay,momentum=args.optimizer_momentum)
+        if ith==0:
+            logger.info(args.opti)
+
+        # begin training
+        args.ith_fold = ith+1
+        logger.info(f'{args.ith_fold:d}/{args.folds:d} folds begins')
+        # begin training
+        val_acc, training_time = training_loop_of_KFold(model, args)
+        all_training_times.extend(training_time)
+
+        range_acc=int(10)
+        acc_val_all.append(val_acc)
+        last_k = np.array(val_acc)[-range_acc:]
+        acc_val_final.append(val_acc[-1])
+        acc_val_last_k.append(last_k.max())
+
+    save_print_results(args,acc_val_all,acc_val_final,acc_val_last_k,logger,range_acc)
+    if all_training_times:
+        best5_times = np.asarray(sorted(all_training_times)[:5])
+        best5_avg = best5_times.mean()
+        best5_std = best5_times.std()
+        logger.info(
+            f"Fit time (best 5 epochs, all folds): {best5_avg:.4f}s ± {best5_std:.4f}s"
+        )
+        save_time(args, best5_avg, best5_std)
+    return acc_val_all
+
+def training_loop_of_KFold(model, args):
+    #setting tensorboard
+    if args.is_writer:
+        args.writer_path = os.path.join('./tensorboard_logs/', f"{args.modelname}_{args.ith_fold}")
+        args.logger.info('writer path {}'.format(args.writer_path))
+        args.writer = SummaryWriter(args.writer_path)
+
+    acc_val = [];loss_val = [];acc_train = [];loss_train = [];training_time=[]
+    logger = args.logger
+    # training loop
+    for epoch in range(0, args.epochs):
+        # training
+        elapse, epoch_loss_train, epoch_acc_train = train_per_epoch(model, args)
+        training_time.append(elapse)
+        acc_train.append(np.asarray(epoch_acc_train).mean() * 100)
+        loss_train.append(np.asarray(epoch_loss_train).mean())
+
+        # validation
+        epoch_loss_val, epoch_acc_val = val_per_epoch(model, args)
+        loss_val.append(np.asarray(epoch_loss_val).mean())
+        acc_val.append(np.asarray(epoch_acc_val).mean() * 100)
+
+        # save data into tensorboard
+        if args.is_writer:
+            args.writer.add_scalar('Loss/val', loss_val[epoch], epoch)
+            args.writer.add_scalar('Accuracy/val', acc_val[epoch], epoch)
+            args.writer.add_scalar('Loss/train', loss_train[epoch], epoch)
+            args.writer.add_scalar('Accuracy/train', acc_train[epoch], epoch)
+
+        # print results
+        experiment_utils.print_results(logger, training_time, acc_val, loss_val, epoch, args)
+    logger.info(
+        'Fold {}/{}: val acc : {:.2f}% with avg time: {:.2f} and avg smallest time: {:.2f}'.format(
+            args.ith_fold, args.folds, acc_val[-1], np.asarray(training_time[-5:]).mean(),
+            np.asarray(sorted(training_time)[:5]).mean()))
+
+    if args.is_writer:
+        args.writer.close()
+    return acc_val, training_time
+
+def write_final_results(file_path,message):
+    # Create a file lock
+    with open(file_path, "a",encoding='utf-8') as file:
+        fcntl.flock(file.fileno(), fcntl.LOCK_EX)  # Acquire an exclusive lock
+
+        # Write the message to the file
+        file.write(message + "\n")
+
+        fcntl.flock(file.fileno(), fcntl.LOCK_UN)
+def save_print_results(args,acc_val_all,acc_val_final,acc_val_last_k,logger,range):
+
+    mean = np.asarray(acc_val_last_k).mean()
+    std = np.asarray(acc_val_last_k).std()
+    final_results_last_k = f'{args.folds} folds last {range:d} average result is: {mean:.2f}±{std:.2f}'
+    final_results = '{} folds final_epoch average result is: {:.2f} ± {:.2f}'.format(args.folds, np.asarray(acc_val_final).mean(), np.asarray(acc_val_final).std())
+    logger.info(final_results_last_k)
+    logger.info(final_results)
+
+    final_results_last_k_path = os.path.join(os.getcwd(), 'final_results_last_k_' + args.dataset)
+    final_results_path = os.path.join(os.getcwd(), 'final_results_' + args.dataset)
+    logger.info("results file path: {} and {}, and saving the results".format(final_results_path,final_results_last_k_path))
+    write_final_results(final_results_path, args.modelname + '- ' + final_results)
+    write_final_results(final_results_last_k_path, args.modelname + '- ' + final_results_last_k)
+    th.save({
+        'acc_val_all': acc_val_all,
+    }, os.path.join(os.getcwd(), f'torch_results_{args.modelname}.pt'))
+
+def save_time(args, fit_time_avg, fit_time_std):
+    file_path = os.path.join(os.getcwd(), f'time_{args.dataset}-{args.modelname}.jsonl')
+    record = {
+        "dataset": args.dataset,
+        "modelname": args.modelname,
+        "fit_time_best5_avg": float(f"{fit_time_avg:.6f}"),
+        "fit_time_best5_std": float(f"{fit_time_std:.6f}")
+    }
+    with open(file_path, "a", encoding='utf-8') as file:
+        fcntl.flock(file.fileno(), fcntl.LOCK_EX)
+        json.dump(record, file, ensure_ascii=False)
+        file.write("\n")
+        fcntl.flock(file.fileno(), fcntl.LOCK_UN)

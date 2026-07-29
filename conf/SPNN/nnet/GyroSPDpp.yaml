@@ -1,0 +1,11 @@
+defaults:
+  - GyroSPD
+  - _self_
+
+model:
+  model_type: GyroSPDpp
+  channels: [1, 1]
+  conv_metric: LEM
+
+classifier:
+  clf_metric: LEM
