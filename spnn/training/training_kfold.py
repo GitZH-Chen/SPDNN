@@ -26,7 +26,7 @@ def training_KFold(cfg,args):
     set_seed_thread(args.seed, args.threadnum)
 
     # begin K fold experiments
-    acc_val_all = [];acc_val_last_k = [];acc_val_final = []
+    acc_val_all = [];acc_val_last_k = []
     all_training_times = []
     for ith in range(args.folds):
         # set dataset, model and optimizer
@@ -55,18 +55,15 @@ def training_KFold(cfg,args):
         range_acc=int(10)
         acc_val_all.append(val_acc)
         last_k = np.array(val_acc)[-range_acc:]
-        acc_val_final.append(val_acc[-1])
         acc_val_last_k.append(last_k.max())
 
-    save_print_results(args,acc_val_all,acc_val_final,acc_val_last_k,logger,range_acc)
+    save_print_results(args,acc_val_all,acc_val_last_k,logger,range_acc)
     if all_training_times:
-        best5_times = np.asarray(sorted(all_training_times)[:5])
-        best5_avg = best5_times.mean()
-        best5_std = best5_times.std()
-        logger.info(
-            f"Fit time (best 5 epochs, all folds): {best5_avg:.4f}s ± {best5_std:.4f}s"
-        )
-        save_time(args, best5_avg, best5_std)
+        all_folds_times = np.asarray(all_training_times)
+        all_folds_avg = all_folds_times.mean()
+        all_folds_std = all_folds_times.std()
+        logger.info(f"Fit time (all folds): {all_folds_avg:.4f}s ± {all_folds_std:.4f}s")
+        save_time(args, all_folds_avg, all_folds_std)
     return acc_val_all
 
 def training_loop_of_KFold(model, args):
@@ -101,9 +98,8 @@ def training_loop_of_KFold(model, args):
         # print results
         experiment_utils.print_results(logger, training_time, acc_val, loss_val, epoch, args)
     logger.info(
-        'Fold {}/{}: val acc : {:.2f}% with avg time: {:.2f} and avg smallest time: {:.2f}'.format(
-            args.ith_fold, args.folds, acc_val[-1], np.asarray(training_time[-5:]).mean(),
-            np.asarray(sorted(training_time)[:5]).mean()))
+        'Fold {}/{}: best val acc in the last 10 epochs: {:.2f}% with avg time over the last 5 epochs: {:.2f}s'.format(
+            args.ith_fold, args.folds, np.asarray(acc_val[-10:]).max(), np.asarray(training_time[-5:]).mean()))
 
     if args.is_writer:
         args.writer.close()
@@ -118,19 +114,15 @@ def write_final_results(file_path,message):
         file.write(message + "\n")
 
         fcntl.flock(file.fileno(), fcntl.LOCK_UN)
-def save_print_results(args,acc_val_all,acc_val_final,acc_val_last_k,logger,range):
+def save_print_results(args,acc_val_all,acc_val_last_k,logger,range):
 
     mean = np.asarray(acc_val_last_k).mean()
     std = np.asarray(acc_val_last_k).std()
-    final_results_last_k = f'{args.folds} folds last {range:d} average result is: {mean:.2f}±{std:.2f}'
-    final_results = '{} folds final_epoch average result is: {:.2f} ± {:.2f}'.format(args.folds, np.asarray(acc_val_final).mean(), np.asarray(acc_val_final).std())
+    final_results_last_k = f'{args.folds} folds best-in-last-{range:d} average result is: {mean:.2f}±{std:.2f}'
     logger.info(final_results_last_k)
-    logger.info(final_results)
 
     final_results_last_k_path = os.path.join(os.getcwd(), 'final_results_last_k_' + args.dataset)
-    final_results_path = os.path.join(os.getcwd(), 'final_results_' + args.dataset)
-    logger.info("results file path: {} and {}, and saving the results".format(final_results_path,final_results_last_k_path))
-    write_final_results(final_results_path, args.modelname + '- ' + final_results)
+    logger.info("results file path: {}, and saving the results".format(final_results_last_k_path))
     write_final_results(final_results_last_k_path, args.modelname + '- ' + final_results_last_k)
     th.save({
         'acc_val_all': acc_val_all,
@@ -141,8 +133,8 @@ def save_time(args, fit_time_avg, fit_time_std):
     record = {
         "dataset": args.dataset,
         "modelname": args.modelname,
-        "fit_time_best5_avg": float(f"{fit_time_avg:.6f}"),
-        "fit_time_best5_std": float(f"{fit_time_std:.6f}")
+        "fit_time_all_folds_avg": float(f"{fit_time_avg:.6f}"),
+        "fit_time_all_folds_std": float(f"{fit_time_std:.6f}")
     }
     with open(file_path, "a", encoding='utf-8') as file:
         fcntl.flock(file.fileno(), fcntl.LOCK_EX)
