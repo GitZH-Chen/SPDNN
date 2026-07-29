@@ -60,7 +60,7 @@ bash scripts/train_fpha_baselines.sh
 
 ## Evaluation protocol
 
-FPHA uses its prepared official training and test split. Each released setting is trained and evaluated once on that fixed split.
+FPHA uses its prepared official training and test split.
 
 ## Output
 
