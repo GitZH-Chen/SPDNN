@@ -60,7 +60,7 @@ bash scripts/train_fpha_baselines.sh
 
 ## Evaluation protocol
 
-FPHA uses its prepared official training and test split. Each released setting is trained and evaluated five times on that same fixed split.
+FPHA uses its prepared official training and test split. Each released setting is trained and evaluated once with the fixed seed `42`.
 
 ## Output
 

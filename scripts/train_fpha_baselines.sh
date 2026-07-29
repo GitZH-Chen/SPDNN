@@ -25,7 +25,6 @@ run_baseline() {
     fit.threadnum=1 \
     fit.device=cpu \
     fit.epochs=200 \
-    fit.seed=42 \
     fit.folds=1 \
     fit.is_writer=False \
     hydra.launcher.n_jobs=1 \
@@ -67,7 +66,6 @@ run_baseline SPDResNet \
   fit.threadnum=1 \
   fit.device=cpu \
   fit.epochs=100 \
-  fit.seed=42 \
   fit.folds=1 \
   fit.is_writer=False \
   hydra.launcher.n_jobs=1 \
@@ -91,7 +89,6 @@ run_gyro() {
     fit.threadnum=1 \
     fit.device="${DEVICE}" \
     fit.epochs="${epochs}" \
-    fit.seed=42 \
     fit.folds=1 \
     fit.is_writer=False \
     hydra.launcher.n_jobs=1 \
@@ -123,7 +120,6 @@ run_gyrospdpp() {
     fit.threadnum=1 \
     fit.device="${DEVICE}" \
     fit.epochs="${epochs}" \
-    fit.seed=42 \
     fit.folds=1 \
     fit.is_writer=False \
     hydra.launcher.n_jobs=1 \
