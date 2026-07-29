@@ -11,7 +11,7 @@ DEVICE="${DEVICE:-0}"
 
 cd "${RELEASE_ROOT}"
 
-run_five_seed_baseline() {
+run_baseline() {
   local model_config="$1"
   shift
   "${PYTHON_BIN}" SPNN.py -m \
@@ -25,7 +25,7 @@ run_five_seed_baseline() {
     fit.threadnum=1 \
     fit.device=cpu \
     fit.epochs=200 \
-    fit.seed=42,32,64,128,256 \
+    fit.seed=42 \
     fit.folds=1 \
     fit.is_writer=False \
     hydra.launcher.n_jobs=1 \
@@ -35,22 +35,22 @@ run_five_seed_baseline() {
 }
 
 # Each invocation trains the model and evaluates the validation split per epoch.
-run_five_seed_baseline SPDNet
-run_five_seed_baseline SPDNetBN
-run_five_seed_baseline SPDNetLieBN \
+run_baseline SPDNet
+run_baseline SPDNetBN
+run_baseline SPDNetLieBN \
   nnet.model.bn_metric=AIM \
   nnet.model.bn_power=1.5 \
   nnet.optimizer.optimizer_mode=AMSGRAD \
   nnet.optimizer.lr=5e-3
-run_five_seed_baseline SPDNetLieBN \
+run_baseline SPDNetLieBN \
   nnet.model.bn_metric=LCM \
   nnet.model.bn_power=0.5 \
   nnet.optimizer.optimizer_mode=AMSGRAD \
   nnet.optimizer.lr=5e-3
 # RResNet validation accuracy can fluctuate sharply between epochs. The results reported in the paper were obtained by selecting the best results in the final several epochs.
-run_five_seed_baseline SPDResNet \
+run_baseline SPDResNet \
   nnet.model.ResBlockMetric=AIM
-run_five_seed_baseline SPDResNet \
+run_baseline SPDResNet \
   nnet.model.ResBlockMetric=LEM
 
 "${PYTHON_BIN}" SPNN.py -m \
@@ -67,7 +67,7 @@ run_five_seed_baseline SPDResNet \
   fit.threadnum=1 \
   fit.device=cpu \
   fit.epochs=100 \
-  fit.seed=42,32,64,128,256 \
+  fit.seed=42 \
   fit.folds=1 \
   fit.is_writer=False \
   hydra.launcher.n_jobs=1 \
@@ -91,7 +91,7 @@ run_gyro() {
     fit.threadnum=1 \
     fit.device="${DEVICE}" \
     fit.epochs="${epochs}" \
-    fit.seed=42,32,64,128,256 \
+    fit.seed=42 \
     fit.folds=1 \
     fit.is_writer=False \
     hydra.launcher.n_jobs=1 \
@@ -123,7 +123,7 @@ run_gyrospdpp() {
     fit.threadnum=1 \
     fit.device="${DEVICE}" \
     fit.epochs="${epochs}" \
-    fit.seed=42,32,64,128,256 \
+    fit.seed=42 \
     fit.folds=1 \
     fit.is_writer=False \
     hydra.launcher.n_jobs=1 \

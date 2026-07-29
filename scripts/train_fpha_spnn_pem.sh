@@ -29,7 +29,7 @@ cd "${RELEASE_ROOT}"
   fit.threadnum=1 \
   fit.device="${DEVICE}" \
   fit.epochs=150 \
-  fit.seed=42,32,64,128,256 \
+  fit.seed=42 \
   fit.folds=1 \
   hydra.launcher.n_jobs=1 \
   hydra.sweep.dir="outputs/${DATASET}" \
