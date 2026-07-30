@@ -3,7 +3,7 @@ import torch as th
 import torch.nn as nn
 
 from geometry.spd.spd_matrices import SPDLogEuclideanMetric,SPDLogCholeskyMetric,SPDAffineInvariantMetric,SPDBuresWassersteinMetric,SPDEuclideanMetric,\
-    tril_param_metrics,bi_param_metrics,single_param_metrics,tril_metrics
+    tril_metrics
 
 class SPDLinear(nn.Module):
     """SPD linear layer"""
@@ -20,7 +20,12 @@ class SPDLinear(nn.Module):
         super(__class__, self).__init__()
         self.shape_in=shape_in;self.shape_out=shape_out;self.n=self.shape_in[-1]
         self.is_phi_inv = is_phi_inv
-        self.metric = metric;self.power = power
+        self.metric = metric
+        if self.metric == 'PEM':
+            self.power = power
+        elif self.metric == 'BWM':
+            # The 2theta-BWM family recovers standard BWM at theta=0.5; see "RMLR: Extending Multinomial Logistic Regression into General Geometries" (NeurIPS 2024).
+            self.power = 0.5
         self.getmetric()
         self.init_parameter()
 
@@ -39,12 +44,12 @@ class SPDLinear(nn.Module):
             "PEM": SPDEuclideanMetric,
         }
 
-        if self.metric in tril_param_metrics:
+        if self.metric == 'PEM':
             self.spd = classes[self.metric](n=self.n,power=self.power)
-        elif self.metric in bi_param_metrics:
+        elif self.metric == 'BWM':
+            self.spd = classes[self.metric](n=self.n,power=self.power)
+        elif self.metric in classes:
             self.spd = classes[self.metric](n=self.n)
-        elif self.metric in single_param_metrics:
-            self.spd = classes[self.metric](n=self.n,power=self.power)
         else:
             raise NotImplementedError
     def init_parameter(self,factor=0.5):
@@ -92,6 +97,7 @@ class SPDLinear(nn.Module):
         return Z_sym
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(shape_in={self.shape_in},shape_out={self.shape_out},"\
-               f"is_phi_inv={self.is_phi_inv},"\
-               f"metric={self.metric},power={self.power})"
+        description = f"{self.__class__.__name__}(shape_in={self.shape_in},shape_out={self.shape_out},is_phi_inv={self.is_phi_inv},metric={self.metric}"
+        if self.metric == 'PEM':
+            description += f",power={self.power}"
+        return description + ")"

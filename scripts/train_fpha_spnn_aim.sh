@@ -18,7 +18,6 @@ cd "${RELEASE_ROOT}"
   nnet.model.architecture=[28,22] \
   nnet.model.channels=[9,1] \
   nnet.model.conv_metric=AIM \
-  nnet.model.conv_power=0.5 \
   nnet.model.conv_is_phi_inv=False \
   nnet.classifier.classifier=SPDMLR \
   nnet.classifier.clf_metric=LEM \

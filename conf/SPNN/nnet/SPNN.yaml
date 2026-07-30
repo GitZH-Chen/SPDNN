@@ -17,7 +17,7 @@ model:
     conv_is_phi_inv: True
     # Geometry used by SPDLinear: LEM, AIM, PEM, LCM, or BWM.
     conv_metric: LEM
-    # Matrix-power/deformation parameter theta used by the selected geometry. It must be nonzero; LEM does not use this field.
+    # Matrix-power parameter theta used only by PEM. It must be nonzero and is ignored by LEM, AIM, LCM, and BWM.
     conv_power: 1.
     # Optional matrix-power activation S -> S^theta applied before SPDLinear. null disables it; the FPHA LCM and BWM launchers set it to -0.25.
     act_power: null
