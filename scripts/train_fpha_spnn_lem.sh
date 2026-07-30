@@ -27,7 +27,7 @@ cd "${RELEASE_ROOT}"
   nnet.optimizer.weight_decay=0 \
   fit.threadnum=1 \
   fit.device="${DEVICE}" \
-  fit.epochs=250 \
+  fit.epochs=150 \
   fit.folds=1 \
   hydra.launcher.n_jobs=1 \
   hydra.sweep.dir="outputs/${DATASET}" \
